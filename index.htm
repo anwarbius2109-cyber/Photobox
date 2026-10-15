@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photobox Web Undangan Pernikahan HD</title>
+    <style>
+        :root {
+            --primary-color: #ff4757;
+            --primary-hover: #ff6b81;
+            --success-color: #2ed573;
+            --wa-color: #25d366;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .camera-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            aspect-ratio: 4 / 3;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Efek cermin */
+        }
+
+        /* Overlay Bingkai Live Preview di Kamera */
+        .camera-frame-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 12px solid #ffffff;
+            pointer-events: none;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, background 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8px;
+        }
+
+        .camera-frame-header, .camera-frame-footer {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 4px 8px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            border-radius: 4px;
+            backdrop-filter: blur(2px);
+            opacity: 0.9;
+        }
+
+        /* Efek Flash Saat Foto Diambil */
+        .flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease;
+            z-index: 10;
+        }
+
+        .flash-active {
+            opacity: 1;
+        }
+
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 110px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 3px 3px 15px rgba(0,0,0,0.8);
+            display: none;
+            z-index: 5;
+            animation: bounceIn 0.5s infinite alternate;
+        }
+
+        @keyframes bounceIn {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.15); }
+        }
+
+        .options-panel {
+            margin-top: 15px;
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        select, input[type="text"] {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 2px solid #e1e1e1;
+            outline: none;
+            background: #fff;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        .controls {
+            margin-top: 15px;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        #btn-capture {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.35);
+        }
+
+        #btn-capture:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        #btn-capture:disabled {
+            background-color: #d1d1d1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .result-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-left: 2px solid #f0f0f0;
+            padding-left: 30px;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        @media (max-width: 850px) {
+            .result-section {
+                border-left: none;
+                border-top: 2px solid #f0f0f0;
+                padding-left: 0;
+                padding-top: 30px;
+            }
+        }
+
+        .canvas-wrapper {
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 8px;
+            background: #fafafa;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        #btn-download {
+            background-color: var(--success-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(46, 213, 115, 0.35);
+            display: none;
+        }
+
+        #btn-download:hover {
+            background-color: #26af5f;
+            transform: translateY(-2px);
+        }
+
+        #btn-whatsapp {
+            background-color: var(--wa-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
+            display: none;
+        }
+
+        #btn-whatsapp:hover {
+            background-color: #1ebe57;
+            transform: translateY(-2px);
+        }
+
+        .status-text {
+            margin-top: 12px;
+            font-size: 0.95rem;
+            color: #555;
+            font-weight: 600;
+            min-height: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>💍 Wedding Web Photobox HD 💍</h1>
+        <p>Abadikan momen bahagiamu, sesuaikan teks undangan, dan kirim langsung ke pengantin!</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Bagian Kamera -->
+        <div class="camera-section">
+            <div class="video-container" id="videoContainer">
+                <video id="video" autoplay playsinline></video>
+                <!-- Efek Flash -->
+                <div id="flashOverlay" class="flash-overlay"></div>
+                <!-- Countdown -->
+                <div id="countdown">3</div>
+                <!-- Live Preview Bingkai -->
+                <div id="cameraOverlay" class="camera-frame-overlay">
+                    <div class="camera-frame-header" id="overlayHeaderText">✦ RIZKY & RANI WEDDING ✦</div>
+                    <div class="camera-frame-footer" id="overlayFooterText">15 Oktober 2026</div>
+                </div>
+            </div>
+
+            <div class="options-panel">
+                <div class="option-group">
+                    <label for="frame-style">Pilih Tema Bingkai Undangan:</label>
+                    <select id="frame-style" onchange="updateLiveFrameStyle()">
+                        <option value="classic">💍 Klasik Putih Elegant</option>
+                        <option value="pink">🌸 Pink Floral Estetik</option>
+                        <option value="gold">✨ Gold Luxury Modern</option>
+                        <option value="rustic">🌿 Rustic Kayu Hangat</option>
+                    </select>
+                </div>
+
+                <div class="option-group">
+                    <label for="custom-text">Nama Acara / Pasangan:</label>
+                    <input type="text" id="custom-text" value="Rizky & Rani Wedding" oninput="updateLiveFrameStyle()" placeholder="Contoh: Dimas & Siska">
+                </div>
+
+                <div class="option-group">
+                    <label for="custom-date">Tanggal / Keterangan Bawah:</label>
+                    <input type="text" id="custom-date" value="15 Oktober 2026" oninput="updateLiveFrameStyle()" placeholder="Contoh: 15.10.2026">
+                </div>
+
+                <div class="option-group">
+                    <label for="wa-number">Nomor WhatsApp Pengantin (Opsional):</label>
+                    <input type="text" id="wa-number" value="6281234567890" placeholder="Format: 628xxxxxxxxxx">
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-capture" onclick="startPhotoboxSession()">📸 Mulai Sesi Foto (3 Pose HD)</button>
+            </div>
+            <div id="status" class="status-text">Kamera siap digunakan</div>
+        </div>
+
+        <!-- Bagian Hasil -->
+        <div class="result-section">
+            <div class="canvas-wrapper">
+                <!-- Ukuran internal Canvas diperbesar untuk kualitas HD tinggi -->
+                <canvas id="resultCanvas" width="900" height="2340"></canvas>
+            </div>
+            <div class="action-buttons">
+                <button id="btn-download" onclick="downloadImage()">💾 Unduh Foto HD</button>
+                <button id="btn-whatsapp" onclick="sendToWhatsApp()">💬 Kirim ke WhatsApp Pengantin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden canvas untuk proses jepret HD -->
+    <canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const countdownEl = document.getElementById('countdown');
+        const flashOverlay = document.getElementById('flashOverlay');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const ctx = resultCanvas.getContext('2d');
+        const hiddenCanvas = document.getElementById('hiddenCanvas');
+        const hiddenCtx = hiddenCanvas.getContext('2d');
+        const btnCapture = document.getElementById('btn-capture');
+        const btnDownload = document.getElementById('btn-download');
+        const btnWhatsapp = document.getElementById('btn-whatsapp');
+        const statusEl = document.getElementById('status');
+        
+        const frameStyleSelect = document.getElementById('frame-style');
+        const customTextInput = document.getElementById('custom-text');
+        const customDateInput = document.getElementById('custom-date');
+        const waNumberInput = document.getElementById('wa-number');
+
+        const cameraOverlay = document.getElementById('cameraOverlay');
+        const overlayHeaderText = document.getElementById('overlayHeaderText');
+        const overlayFooterText = document.getElementById('overlayFooterText');
+
+        let capturedImages = [];
+
+        // Konfigurasi Tema Bingkai HD
+        const themes = {
+            classic: {
+                bg: "#ffffff",
+                text: "#222222",
+                accent: "#555555",
+                borderStyle: "12px solid #ffffff",
+                headerBg: "rgba(255, 255, 255, 0.9)",
+                headerColor: "#222222"
+            },
+            pink: {
+                bg: "#fff0f3",
+                text: "#880e4f",
+                accent: "#d81b60",
+                borderStyle: "12px solid #ffccd5",
+                headerBg: "rgba(255, 182, 193, 0.9)",
+                headerColor: "#880e4f"
+            },
+            gold: {
+                bg: "#fdfbf7",
+                text: "#5c4033",
+                accent: "#c5a059",
+                borderStyle: "12px solid #e6d5b8",
+                headerBg: "rgba(230, 213, 184, 0.9)",
+                headerColor: "#5c4033"
+            },
+            rustic: {
+                bg: "#f4f1ea",
+                text: "#4a3b32",
+                accent: "#8c6239",
+                borderStyle: "12px solid #dcd7c9",
+                headerBg: "rgba(220, 215, 201, 0.9)",
+                headerColor: "#4a3b32"
+            }
+        };
+
+        // Perbarui Live Preview Kamera
+        function updateLiveFrameStyle() {
+            const selectedTheme = themes[frameStyleSelect.value];
+            cameraOverlay.style.border = selectedTheme.borderStyle;
+            overlayHeaderText.style.background = selectedTheme.headerBg;
+            overlayHeaderText.style.color = selectedTheme.headerColor;
+            overlayHeaderText.textContent = "✦ " + (customTextInput.value || "WEDDING PHOTOBOX") + " ✦";
+            overlayFooterText.style.background = selectedTheme.headerBg;
+            overlayFooterText.style.color = selectedTheme.headerColor;
+            overlayFooterText.textContent = customDateInput.value || "Special Moment";
+        }
+
+        updateLiveFrameStyle();
+
+        // Inisialisasi Kamera Resolusi Tinggi HD (1280x720)
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 } }, 
+                    audio: false 
+                });
+                video.srcObject = stream;
+            }
