@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photobox Web Siap Pakai</title>
+    <style>
+        :root {
+            --primary-color: #ff4757;
+            --primary-hover: #ff6b81;
+            --success-color: #2ed573;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 30px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            max-width: 950px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .camera-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .video-container {
+            position: relative;
+            width: 480px;
+            height: 360px;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Efek cermin */
+        }
+
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 100px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.8);
+            display: none;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .options-panel {
+            margin-top: 15px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #btn-capture {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+        }
+
+        #btn-capture:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        #btn-capture:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .result-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-left: 2px solid #f0f0f0;
+            padding-left: 30px;
+        }
+
+        @media (max-width: 850px) {
+            .result-section {
+                border-left: none;
+                border-top: 2px solid #f0f0f0;
+                padding-left: 0;
+                padding-top: 30px;
+            }
+            .video-container {
+                width: 100%;
+                max-width: 480px;
+            }
+        }
+
+        .canvas-wrapper {
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 15px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        canvas {
+            display: block;
+            border-radius: 6px;
+            background: #fafafa;
+        }
+
+        #btn-download {
+            background-color: var(--success-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 213, 115, 0.3);
+            display: none;
+        }
+
+        #btn-download:hover {
+            background-color: #26af5f;
+            transform: translateY(-2px);
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Web Photobox Studio</h1>
+        <p>Ambil 3 foto beruntun, pilih tema bingkai, dan unduh hasilnya!</p>
+    </header>
+
+    <div class="main-container">
+        <!-- Bagian Kamera -->
+        <div class="camera-section">
+            <div class="video-container">
+                <video id="video" autoplay playsinline></video>
+                <div id="countdown">3</div>
+            </div>
+
+            <div class="options-panel">
+                <div class="option-group">
+                    <label for="frame-style">Pilih Bingkai (Frame):</label>
+                    <select id="frame-style">
+                        <option value="classic">Klasik Putih (Strip)</option>
+                        <option value="pink">Estetik Pink Pastel</option>
+                        <option value="dark">Dark Mode Minimalis</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btn-capture" onclick="startPhotoboxSession()">Mulai Sesi Foto (3 Foto)</button>
+            </div>
+            <div id="status" class="status-text">Kamera siap digunakan</div>
+        </div>
+
+        <!-- Bagian Hasil -->
+        <div class="result-section">
+            <div class="canvas-wrapper">
+                <canvas id="resultCanvas" width="300" height="750"></canvas>
+            </div>
+            <button id="btn-download" onclick="downloadImage()">Unduh Foto Strip</button>
+        </div>
+    </div>
+
+    <!-- Hidden canvas untuk memproses frame video -->
+    <canvas id="hiddenCanvas" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video');
+        const countdownEl = document.getElementById('countdown');
+        const resultCanvas = document.getElementById('resultCanvas');
+        const ctx = resultCanvas.getContext('2d');
+        const hiddenCanvas = document.getElementById('hiddenCanvas');
+        const hiddenCtx = hiddenCanvas.getContext('2d');
+        const btnCapture = document.getElementById('btn-capture');
+        const btnDownload = document.getElementById('btn-download');
+        const statusEl = document.getElementById('status');
+        const frameStyleSelect = document.getElementById('frame-style');
+
+        let capturedImages = [];
+
+        // Inisialisasi Kamera Perangkat
+        async function initCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720 }, 
+                    audio: false 
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                alert("Gagal mengakses kamera. Pastikan Anda mengizinkan akses kamera pada browser.");
+                statusEl.textContent = "Kamera tidak aktif/izin ditolak.";
+                console.error(err);
+            }
+        }
+
+        initCamera();
+
+        // Alur Sesi Photobox (Mengambil 3 Foto Beruntun)
+        async function startPhotoboxSession() {
+            btnCapture.disabled = true;
+            btnDownload.style.display = 'none';
+            capturedImages = [];
+
+            for (let i = 1; i <= 3; i++) {
+                statusEl.textContent = `Bersiap mengambil foto ke-${i} dari 3...`;
+                await runCountdown();
+                
+                // Ambil snapshot gambar saat hitung mundur habis
+                captureSinglePhoto();
+                statusEl.textContent = `Foto ke-${i} berhasil diambil!`;
+                
+                // Jeda singkat antar foto jika bukan foto terakhir
+                if (i < 3) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+            }
+
+            // Setelah 3 foto terkumpul, render ke strip canvas
+            renderPhotoStrip();
+            statusEl.textContent = "Sesi selesai! Silakan unduh foto Anda.";
+            btnCapture.disabled = false;
+        }
+
+        // Fungsi Hitung Mundur 3 Detik
+        function runCountdown() {
+            return new Promise((resolve) => {
+                let count = 3;
+                countdownEl.style.display = 'block';
+                countdownEl.textContent = count;
+
+                let timer = setInterval(() => {
+                    count--;
+                    if (count > 0) {
+                        countdownEl.textContent = count;
+                    } else {
+                        clearInterval(timer);
+                        countdownEl.style.display = 'none';
+                        resolve();
+                    }
+                }, 1000);
+            });
+        }
+
+        // Ambil satu jepretan dari video stream
+        function captureSinglePhoto() {
+            hiddenCanvas.width = video.videoWidth;
+            hiddenCanvas.height = video.videoHeight;
+
+            // Efek mirror (balik horizontal) agar sesuai dengan tampilan video
+            hiddenCtx.save();
+            hiddenCtx.scale(-1, 1);
+            hiddenCtx.drawImage(video, -hiddenCanvas.width, 0, hiddenCanvas.width, hiddenCanvas.height);
+            hiddenCtx.restore();
+
+            // Simpan data gambar ke dalam array
+            const imgDataUrl = hiddenCanvas.toDataURL('image/png');
+            const img = new Image();
+            img.src = imgDataUrl;
+            capturedImages.push(img);
+        }
+
+        // Menggabungkan 3 foto ke dalam template strip foto vertikal
+        function renderPhotoStrip() {
+            const frameTheme = frameStyleSelect.value;
+            
+            // Konfigurasi tema warna & bingkai
+            let bgColor = "#ffffff";
+            let textColor = "#333333";
+            let accentColor = "#ff4757";
+
+            if (frameTheme === 'pink') {
+                bgColor = "#fff0f3";
+                textColor = "#d81b60";
+                accentColor = "#ff69b4";
+            } else if (frameTheme === 'dark') {
+                bgColor = "#1e1e1e";
+                textColor = "#ffffff";
+                accentColor = "#00d2d3";
+            }
+
+            // Ukuran Canvas Strip
+            const width = 300;
+            const height = 780;
+            resultCanvas.width = width;
+            resultCanvas.height = height;
+
+            // 1. Gambar Background Keseluruhan
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. Gambar 3 Foto secara vertikal
+            let loadedCount = 0;
+            const photoWidth = 260;
+            const photoHeight = 175;
+            const startX = (width - photoWidth) / 2;
+            const startY = 25;
+            const gapY = 15;
+
+            capturedImages.forEach((img, index) => {
+                img.onload = () => {
+                    const currentY = startY + (index * (photoHeight + gapY));
+                    
+                    // Bingkai tipis di setiap kotak foto
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(startX - 4, currentY - 4, photoWidth + 8, photoHeight + 8);
+                    
+                    ctx.drawImage(img, startX, currentY, photoWidth, photoHeight);
+                    
+                    loadedCount++;
+                    if (loadedCount === 3) {
+                        drawFooterBranding(width, height, startY + (3 * (photoHeight + gapY)), textColor, accentColor);
+                    }
+                };
+                // Jika gambar sudah cached
+                if (img.complete) {
+                    img.onload();
+                }
+            });
+        }
+
+        // Menambahkan teks footer dan dekorasi bawah strip
+        function drawFooterBranding(width, totalHeight, currentY, textColor, accentColor) {
+            ctx.fillStyle = textColor;
+            ctx.font = "bold 16px 'Segoe UI', sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("✦ MY PHOTOTBOX ✦", width / 2, currentY + 15);
+
+            ctx.fillStyle = accentColor;
+            ctx.font = "12px 'Segoe UI', sans-serif";
+            const dateStr = new Date().toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+            ctx.fillText(dateStr, width / 2, currentY + 35);
+
+            // Tampilkan tombol unduh setelah selesai dirender
+            btnDownload.style.display = 'block';
+        }
+
+        // Fungsi Mengunduh Hasil Foto
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'photobox-strip-' + Date.now() + '.png';
+            link.href = resultCanvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
